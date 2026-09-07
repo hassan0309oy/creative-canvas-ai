@@ -88,7 +88,7 @@ export async function synthesizeSpeech(params: {
   provider?: string;
 }): Promise<StoredAsset> {
   const order =
-    params.provider && params.provider !== "auto" ? [params.provider] : ["elevenlabs", "kokoro", "piper"];
+    params.provider && params.provider !== "auto" ? [params.provider] : TTS_ORDER;
   const result = await withFallback(
     "la synthèse vocale",
     order.filter((n) => TTS[n]).map((name) => ({ name, run: () => TTS[name]!(params.text, params.voiceId) })),
@@ -110,7 +110,7 @@ export async function synthesizePodcast(params: {
 }): Promise<StoredAsset & { segments: number }> {
   if (params.segments.length === 0) throw new Error("Le podcast doit contenir au moins une réplique.");
   const order =
-    params.provider && params.provider !== "auto" ? [params.provider] : ["elevenlabs", "kokoro", "piper"];
+    params.provider && params.provider !== "auto" ? [params.provider] : TTS_ORDER;
 
   const chunks: Uint8Array[] = [];
   let usedProvider = "";
