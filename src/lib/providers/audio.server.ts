@@ -23,10 +23,22 @@ async function elevenTts(text: string, voiceId?: string) {
   return { bytes: new Uint8Array(await res.arrayBuffer()), mimeType: "audio/mpeg" };
 }
 
-/** Kokoro (serveur auto-hébergé, URL configurable) — voix libre. */
+/** Kokoro — via Hugging Face (hexgrad/Kokoro-82M) ou un serveur auto-hébergé. */
 async function kokoroTts(text: string, voiceId?: string) {
   const base = optionalEnv("KOKORO_API_URL");
-  if (!base) throw new Error("KOKORO_API_URL absente (serveur Kokoro non déployé)");
+  if (!base) {
+    const token = optionalEnv("HF_TOKEN");
+    if (!token) throw new Error("Ni KOKORO_API_URL ni HF_TOKEN ne sont configurées");
+    const { InferenceClient } = await import("@huggingface/inference");
+    const blob = (await new InferenceClient(token).textToSpeech({
+      model: optionalEnv("HF_TTS_MODEL") ?? "hexgrad/Kokoro-82M",
+      inputs: text,
+    })) as unknown as Blob;
+    return {
+      bytes: new Uint8Array(await blob.arrayBuffer()),
+      mimeType: blob.type || "audio/wav",
+    };
+  }
   const res = await fetch(`${base.replace(/\/$/, "")}/v1/audio/speech`, {
     method: "POST",
     headers: {
@@ -38,6 +50,7 @@ async function kokoroTts(text: string, voiceId?: string) {
   if (!res.ok) throw new Error(`Kokoro [${res.status}] ${(await res.text()).slice(0, 300)}`);
   return { bytes: new Uint8Array(await res.arrayBuffer()), mimeType: "audio/mpeg" };
 }
+
 
 /** Piper (serveur auto-hébergé, URL configurable). */
 async function piperTts(text: string, voiceId?: string) {
