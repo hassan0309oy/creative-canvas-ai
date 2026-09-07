@@ -143,6 +143,13 @@ function Workspace() {
               </option>
             ))}
           </select>
+          <Link
+            to="/settings"
+            className="rounded-md border border-border bg-card px-2.5 py-1.5 text-xs hover:bg-accent"
+          >
+            Réglages
+          </Link>
+
           <button
             onClick={() => setPanel((v) => !v)}
             className="rounded-md border border-border bg-card px-2.5 py-1.5 text-xs lg:hidden"
