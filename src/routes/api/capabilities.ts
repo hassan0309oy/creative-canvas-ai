@@ -53,14 +53,21 @@ export const Route = createFileRoute("/api/capabilities")({
           {
             id: "audio",
             label: "Voix, podcast & musique",
-            ready: has("ELEVENLABS_API_KEY") || has("KOKORO_API_URL") || has("PIPER_API_URL") || has("HF_TOKEN"),
+            ready:
+              has("ELEVENLABS_API_KEY") ||
+              has("KOKORO_API_URL") ||
+              has("PIPER_API_URL") ||
+              has("HF_TOKEN") ||
+              has("LOVABLE_API_KEY"),
             missing: [],
             providers: [
               { name: "elevenlabs", ready: has("ELEVENLABS_API_KEY") },
               { name: "kokoro", ready: has("KOKORO_API_URL") },
               { name: "piper", ready: has("PIPER_API_URL") },
+              { name: "voix intégrée (Lovable)", ready: has("LOVABLE_API_KEY") },
               { name: "huggingface (musique)", ready: has("HF_TOKEN") },
             ],
+
           },
           { id: "pptx", label: "PowerPoint .pptx", ready: true, missing: [] },
           {
