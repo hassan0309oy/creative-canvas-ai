@@ -26,10 +26,11 @@ async function attempt<T>(label: string, run: () => Promise<T>) {
 }
 
 /** Applique le fournisseur choisi dans les réglages quand l'agent n'en impose pas. */
-async function withPreferred<T extends { provider?: string }>(
+async function withPreferred<T extends { provider?: string | undefined }>(
   kind: "image" | "video" | "audio" | "memory",
   input: T,
 ): Promise<T> {
+
   if (input.provider && input.provider !== "auto") return input;
   const preferred = await preferredProvider(kind);
   return preferred ? { ...input, provider: preferred } : input;
