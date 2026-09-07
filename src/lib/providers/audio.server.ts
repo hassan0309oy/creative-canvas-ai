@@ -52,13 +52,35 @@ async function piperTts(text: string, voiceId?: string) {
   return { bytes: new Uint8Array(await res.arrayBuffer()), mimeType: "audio/wav" };
 }
 
+/** Passerelle Lovable AI — voix intégrée, aucune clé fournisseur à saisir. */
+async function lovableTts(text: string, voiceId?: string) {
+  const key = optionalEnv("LOVABLE_API_KEY");
+  if (!key) throw new Error("LOVABLE_API_KEY absente");
+  const res = await fetch("https://ai.gateway.lovable.dev/v1/audio/speech", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
+    body: JSON.stringify({
+      model: "openai/gpt-4o-mini-tts",
+      input: text,
+      voice: voiceId && /^[a-z]+$/.test(voiceId) ? voiceId : "alloy",
+      response_format: "mp3",
+    }),
+  });
+  if (!res.ok) throw new Error(`Passerelle Lovable [${res.status}] ${(await res.text()).slice(0, 400)}`);
+  return { bytes: new Uint8Array(await res.arrayBuffer()), mimeType: "audio/mpeg" };
+}
+
 const TTS: Record<string, (t: string, v?: string) => Promise<{ bytes: Uint8Array; mimeType: string }>> = {
   elevenlabs: elevenTts,
   kokoro: kokoroTts,
   piper: piperTts,
+  lovable: lovableTts,
 };
 
+const TTS_ORDER = ["elevenlabs", "kokoro", "piper", "lovable"];
+
 export const TTS_PROVIDERS = Object.keys(TTS);
+
 
 export async function synthesizeSpeech(params: {
   text: string;
